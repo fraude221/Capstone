@@ -15,7 +15,7 @@ class App(customtkinter.CTk):
     tab2 = "Tables"
 
     # configure window
-    self.title("CustomTkinter complex_example.py")
+    self.title("COP Feature Extraction Tool")
     self.geometry(f"{1200}x{800}")
 
     # configure grid layout (4x4)
