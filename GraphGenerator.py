@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-
+from PIL import Image
+from customtkinter import CTkImage
+import customtkinter
 
 def generate_scatter_plot(frame, x, y, time, title, x_label, y_label):
     # Clear grid widgets
@@ -9,7 +11,7 @@ def generate_scatter_plot(frame, x, y, time, title, x_label, y_label):
 
     # Create The Scatter Plot Graph
     fig, ax = plt.subplots()
-    sc = ax.scatter(x, y, c=time, cmap='RdBu_r', edgecolor='black', linewidths=1, alpha=0.75)
+    sc = ax.scatter(x, y, c=time, cmap='winter', alpha=0.75, s=0.75)
     ax.set_title(title)
     ax.set_xlabel(x_label)
     ax.set_ylabel(y_label)
@@ -30,7 +32,7 @@ def generate_line_plot(frame, x, y, title, x_label, y_label):
 
     # Create The Line Plot Graph
     fig, ax = plt.subplots()
-    ax.plot(x, y)
+    ax.plot(x, y, color='black')
     ax.set_title(title)
     ax.set_xlabel(x_label)
     ax.set_ylabel(y_label)

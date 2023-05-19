@@ -1,7 +1,6 @@
 import pandas as pd
 import customtkinter
 from tkinter import filedialog
-
 import GraphGenerator
 
 customtkinter.set_appearance_mode("dark")
@@ -28,10 +27,12 @@ class App(customtkinter.CTk):
         self.sidebar_frame.grid(row=0, column=0, rowspan=4, sticky="nsew")
         self.sidebar_frame.grid_rowconfigure(4, weight=1)
 
-        self.logo_label = customtkinter.CTkLabel(self.sidebar_frame, text="COP Feature Extraction Tool", font=customtkinter.CTkFont(size=20, weight="bold"))
+        self.logo_label = customtkinter.CTkLabel(self.sidebar_frame, text="COP Feature Extraction Tool",
+                                                 font=customtkinter.CTkFont(size=20, weight="bold"))
         self.logo_label.grid(row=0, column=0, padx=20, pady=(20, 10))
 
-        self.sidebar_upload_button = customtkinter.CTkButton(self.sidebar_frame, text="Open Excel File", width=250, height=50, command=self.upload_file)
+        self.sidebar_upload_button = customtkinter.CTkButton(self.sidebar_frame, text="Open Excel File", width=250,
+                                                             height=50, command=self.upload_file)
         self.sidebar_upload_button.grid(row=1, column=0, padx=20, pady=10)
 
         self.appearance_mode_label = customtkinter.CTkLabel(self.sidebar_frame, text="Appearance Mode:", anchor="w")
@@ -51,17 +52,14 @@ class App(customtkinter.CTk):
         self.tabview.tab(tab2).grid_columnconfigure(0, weight=1)
 
         # Create Graph Frames
-        self.tabview_graph_frame_up = customtkinter.CTkFrame(self.tabview.tab(tab1), corner_radius=0)
-        self.tabview_graph_frame_up.grid(row=0, column=0, padx=(20, 20), pady=(10, 10), sticky="nsew")
+        self.tabview_graph_frame_left_up = customtkinter.CTkFrame(self.tabview.tab(tab1), corner_radius=0)
+        self.tabview_graph_frame_left_up.grid(row=0, column=0, padx=(20, 20), pady=(10, 10), sticky="nsew")
 
-        self.tabview_graph_frame_down = customtkinter.CTkFrame(self.tabview.tab(tab1), corner_radius=0)
-        self.tabview_graph_frame_down.grid(row=1, column=0, padx=(20, 20), pady=(10, 10), sticky="nsew")
+        self.tabview_graph_frame_left_down = customtkinter.CTkFrame(self.tabview.tab(tab1), corner_radius=0)
+        self.tabview_graph_frame_left_down.grid(row=1, column=0, padx=(20, 20), pady=(10, 10), sticky="nsew")
 
-        self.tabview_graph_frame_left = customtkinter.CTkFrame(self.tabview.tab(tab1), corner_radius=0)
-        self.tabview_graph_frame_left.grid(row=0, column=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
-
-        self.tabview_graph_frame_right = customtkinter.CTkFrame(self.tabview.tab(tab1), corner_radius=0)
-        self.tabview_graph_frame_right.grid(row=1, column=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
+        self.tabview_graph_frame_right_up = customtkinter.CTkFrame(self.tabview.tab(tab1), corner_radius=0)
+        self.tabview_graph_frame_right_up.grid(row=0, column=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
 
         # Create Scrollable Frame
         self.tabview_scrollable_frame = customtkinter.CTkScrollableFrame(self.tabview.tab(tab2), height=800)
@@ -81,15 +79,15 @@ class App(customtkinter.CTk):
         # Get Data From Excel
         df = pd.read_excel(file_path)
 
-        time = df['Time']
+        time = df['Seq']
         x = df['COPx']
         y = df['COPy']
 
-        # Generate Graphs
-        GraphGenerator.generate_scatter_plot(self.tabview_graph_frame_up, x, y, time, 'COP Over Time Scatter Plot', 'COPx', 'COPy')
-        GraphGenerator.generate_line_plot(self.tabview_graph_frame_down, x, y, 'COP Over Time Line Plot', 'COPx', 'COPy')
-        GraphGenerator.generate_line_plot(self.tabview_graph_frame_left, time, x, 'Mediolateral Line Plot', 'Time', 'COPx')
-        GraphGenerator.generate_line_plot(self.tabview_graph_frame_right, time, y, 'Anteroposterior Line Plot', 'Time', 'COPy')
+        # Create Graphs
+        GraphGenerator.generate_scatter_plot(self.tabview_graph_frame_right_up, x, y, time, 'COP Over Time Scatter Plot', 'COPx', 'COPy')
+        GraphGenerator.generate_line_plot(self.tabview_graph_frame_left_up, time, x, 'Mediolateral Line Plot', 'Time', 'COPx')
+        GraphGenerator.generate_line_plot(self.tabview_graph_frame_left_down, time, y, 'Anteroposterior Line Plot', 'Time', 'COPy')
+
         GraphGenerator.generate_tables(self.tabview_scrollable_frame)
 
 
