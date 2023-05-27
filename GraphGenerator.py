@@ -1,8 +1,7 @@
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from PIL import Image
-from customtkinter import CTkImage
 import customtkinter
+
 
 def generate_scatter_plot(frame, x, y, time, title, x_label, y_label):
     # Clear grid widgets
@@ -44,24 +43,23 @@ def generate_line_plot(frame, x, y, title, x_label, y_label):
     frame.grid_columnconfigure(0, weight=1)
     canvas.draw()
 
-def generate_tables(frame):
-    # Define the table data and column labels
-    table_data_1 = []
-    col_labels_1 = ['Label', 'Value']
 
-    for i in range(0,100):
-        table_data_1.append(['Lab', 'Val'])
+def generate_tables(frame, feature_labels, feature_values):
+    # Create Header
+    add_label_value_pair(frame, 0, "Label", "Value", 80, 40)
 
-    # Create The Table
-    fig, ax = plt.subplots()
-    table = ax.table(cellText=table_data_1, colLabels=col_labels_1, loc='center')
-    table.auto_set_font_size(False)
-    table.set_fontsize(12)
-    table.scale(1, 1.5)
-    ax.axis('off')
+    # Create label value pairs
+    for i in range(len(feature_labels)):
+        add_label_value_pair(frame, i+1, feature_labels[i], feature_values[i], 50, 20)
 
-    # Draw Table
-    canvas = FigureCanvasTkAgg(fig, master=frame)
-    canvas.get_tk_widget().grid(row=0, column=0, sticky="nsew")
-    frame.grid_columnconfigure(0, weight=1)
-    canvas.draw()
+
+def add_label_value_pair(frame, index, label, value, height, text_size):
+    label_frame = customtkinter.CTkFrame(master=frame, corner_radius=10, border_color='white', border_width=1, height=height)
+    label_frame.grid(row=index, column=0, padx=(20, 5), pady=(5, 5), sticky="ew")
+    label_text = customtkinter.CTkLabel(label_frame, text=label, font=customtkinter.CTkFont(size=text_size, weight="bold"))
+    label_text.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
+
+    value_frame = customtkinter.CTkFrame(master=frame, corner_radius=10, border_color='white', border_width=1, height=height)
+    value_frame.grid(row=index, column=1, padx=(5, 20), pady=(5, 5), sticky="ew")
+    value_text = customtkinter.CTkLabel(value_frame, text=value, font=customtkinter.CTkFont(size=text_size, weight="bold"))
+    value_text.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")

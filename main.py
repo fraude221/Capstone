@@ -50,6 +50,7 @@ class App(customtkinter.CTk):
         self.tabview.tab(tab1).grid_columnconfigure((0, 1), weight=1)
         self.tabview.tab(tab1).grid_rowconfigure((0, 1), weight=1)
         self.tabview.tab(tab2).grid_columnconfigure(0, weight=1)
+        self.tabview.tab(tab2).grid_rowconfigure(0, weight=1)
 
         # Create Graph Frames
         self.tabview_graph_frame_left_up = customtkinter.CTkFrame(self.tabview.tab(tab1), corner_radius=0)
@@ -62,8 +63,10 @@ class App(customtkinter.CTk):
         self.tabview_graph_frame_right_up.grid(row=0, column=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
 
         # Create Scrollable Frame
-        self.tabview_scrollable_frame = customtkinter.CTkScrollableFrame(self.tabview.tab(tab2), height=800)
+        self.tabview_scrollable_frame = customtkinter.CTkScrollableFrame(self.tabview.tab(tab2))
         self.tabview_scrollable_frame.grid(row=0, column=0, padx=(20, 20), pady=(20, 20), sticky="nsew")
+        self.tabview_scrollable_frame.grid_columnconfigure(0, weight=1)
+        self.tabview_scrollable_frame.grid_columnconfigure(1, weight=2)
 
         # Set Default Values
         self.appearance_mode_option_menu.set("Dark")
@@ -77,18 +80,22 @@ class App(customtkinter.CTk):
         file_path = filedialog.askopenfilename(filetypes=[("Excel file", "*.xlsx")])
 
         # Get Data From Excel
-        df = pd.read_excel(file_path)
+        measurement_df = pd.read_excel(file_path, "Measurement Data")
+        feature_df = pd.read_excel(file_path, "Feature Data")
 
-        time = df['Seq']
-        x = df['COPx']
-        y = df['COPy']
+        x = measurement_df['COPx']
+        y = measurement_df['COPy']
+        time = range(0, len(x))
+
+        feature_labels = feature_df.columns.tolist()
+        feature_values = feature_df.iloc[0].tolist()
 
         # Create Graphs
         GraphGenerator.generate_scatter_plot(self.tabview_graph_frame_right_up, x, y, time, 'COP Over Time Scatter Plot', 'COPx', 'COPy')
         GraphGenerator.generate_line_plot(self.tabview_graph_frame_left_up, time, x, 'Mediolateral Line Plot', 'Time', 'COPx')
         GraphGenerator.generate_line_plot(self.tabview_graph_frame_left_down, time, y, 'Anteroposterior Line Plot', 'Time', 'COPy')
 
-        GraphGenerator.generate_tables(self.tabview_scrollable_frame)
+        GraphGenerator.generate_tables(self.tabview_scrollable_frame, feature_labels, feature_values)
 
 
 # Start the main loop
