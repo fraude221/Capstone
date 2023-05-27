@@ -80,22 +80,37 @@ class App(customtkinter.CTk):
         file_path = filedialog.askopenfilename(filetypes=[("Excel file", "*.xlsx")])
 
         # Get Data From Excel
-        measurement_df = pd.read_excel(file_path, "Measurement Data")
-        feature_df = pd.read_excel(file_path, "Feature Data")
+        try:
+            measurement_df = pd.read_excel(file_path, "Measurement Data")
+            feature_df = pd.read_excel(file_path, "Feature Data")
+        except:
+            try:
+                measurement_df = pd.read_excel(file_path)
+                feature_df = None
+            except:
+                return
 
-        x = measurement_df['COPx']
-        y = measurement_df['COPy']
-        time = range(0, len(x))
+        if measurement_df is not None:
+            # Convert data to list
+            x = measurement_df['COPx']
+            y = measurement_df['COPy']
+            time = range(0, len(x))
 
-        feature_labels = feature_df.columns.tolist()
-        feature_values = feature_df.iloc[0].tolist()
+            # Create Graphs
+            GraphGenerator.generate_scatter_plot(self.tabview_graph_frame_right_up, x, y, time,
+                                                 'COP Over Time Scatter Plot', 'COPx', 'COPy')
+            GraphGenerator.generate_line_plot(self.tabview_graph_frame_left_up, time, x, 'Mediolateral Line Plot',
+                                              'Time', 'COPx')
+            GraphGenerator.generate_line_plot(self.tabview_graph_frame_left_down, time, y, 'Anteroposterior Line Plot',
+                                              'Time', 'COPy')
 
-        # Create Graphs
-        GraphGenerator.generate_scatter_plot(self.tabview_graph_frame_right_up, x, y, time, 'COP Over Time Scatter Plot', 'COPx', 'COPy')
-        GraphGenerator.generate_line_plot(self.tabview_graph_frame_left_up, time, x, 'Mediolateral Line Plot', 'Time', 'COPx')
-        GraphGenerator.generate_line_plot(self.tabview_graph_frame_left_down, time, y, 'Anteroposterior Line Plot', 'Time', 'COPy')
+        if feature_df is not None:
+            # Convert data to list
+            feature_labels = feature_df.columns.tolist()
+            feature_values = feature_df.iloc[0].tolist()
 
-        GraphGenerator.generate_tables(self.tabview_scrollable_frame, feature_labels, feature_values)
+            # Create Tables
+            GraphGenerator.generate_tables(self.tabview_scrollable_frame, feature_labels, feature_values)
 
 
 # Start the main loop
