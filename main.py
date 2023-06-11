@@ -16,7 +16,7 @@ class App(customtkinter.CTk):
 
         # Configure Window
         self.title("COP Feature Extraction Tool")
-        self.geometry(f"{1600}x{800}")
+        self.geometry(f"{1600}x{1000}")
 
         # Configure Grid Layout
         self.grid_columnconfigure(1, weight=1)
@@ -31,9 +31,13 @@ class App(customtkinter.CTk):
                                                  font=customtkinter.CTkFont(size=20, weight="bold"))
         self.logo_label.grid(row=0, column=0, padx=20, pady=(20, 10))
 
-        self.sidebar_upload_button = customtkinter.CTkButton(self.sidebar_frame, text="Open Excel File", width=250,
+        self.sidebar_upload_xls_button = customtkinter.CTkButton(self.sidebar_frame, text="Open Excel File", width=250,
                                                              height=50, command=self.upload_file)
-        self.sidebar_upload_button.grid(row=1, column=0, padx=20, pady=10)
+        self.sidebar_upload_xls_button.grid(row=1, column=0, padx=20, pady=10)
+
+        self.sidebar_upload_csv_button = customtkinter.CTkButton(self.sidebar_frame, text="Open CSV File", width=250,
+                                                             height=50, command=self.upload_csv_file)
+        self.sidebar_upload_csv_button.grid(row=2, column=0, padx=20, pady=10)
 
         self.appearance_mode_label = customtkinter.CTkLabel(self.sidebar_frame, text="Appearance Mode:", anchor="w")
         self.appearance_mode_label.grid(row=7, column=0, padx=20, pady=(10, 0))
@@ -48,7 +52,7 @@ class App(customtkinter.CTk):
         self.tabview.add(tab1)
         self.tabview.add(tab2)
         self.tabview.tab(tab1).grid_columnconfigure((0, 1), weight=1)
-        self.tabview.tab(tab1).grid_rowconfigure((0, 1), weight=1)
+        self.tabview.tab(tab1).grid_rowconfigure((0, 1, 2), weight=1)
         self.tabview.tab(tab2).grid_columnconfigure(0, weight=1)
         self.tabview.tab(tab2).grid_rowconfigure(0, weight=1)
 
@@ -62,6 +66,12 @@ class App(customtkinter.CTk):
         self.tabview_graph_frame_right_up = customtkinter.CTkFrame(self.tabview.tab(tab1), corner_radius=0)
         self.tabview_graph_frame_right_up.grid(row=0, column=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
 
+        self.tabview_graph_frame_right_down = customtkinter.CTkFrame(self.tabview.tab(tab1), corner_radius=0)
+        self.tabview_graph_frame_right_down.grid(row=1, column=1, padx=(20, 20), pady=(10, 10), sticky="nsew")
+
+        self.tabview_graph_frame_down = customtkinter.CTkFrame(self.tabview.tab(tab1), corner_radius=0)
+        self.tabview_graph_frame_down.grid(row=2, column=0, padx=(20, 20), pady=(10, 10), sticky="nsew")
+
         # Create Scrollable Frame
         self.tabview_scrollable_frame = customtkinter.CTkScrollableFrame(self.tabview.tab(tab2))
         self.tabview_scrollable_frame.grid(row=0, column=0, padx=(20, 20), pady=(20, 20), sticky="nsew")
@@ -74,6 +84,34 @@ class App(customtkinter.CTk):
     @staticmethod
     def change_appearance_mode_event(new_appearance_mode: str):
         customtkinter.set_appearance_mode(new_appearance_mode)
+
+    def upload_csv_file(self):
+        # Get File Path
+        file_path = filedialog.askopenfilename(filetypes=[("CSV File", "*.csv")])
+
+        # Get Data From Excel
+        try:
+            df = pd.read_csv(file_path)
+        except:
+            return
+
+        try:
+            # Convert data to list
+            x = df['COPx']
+            y = df['COPy']
+
+            # Create Graphs
+            self.generate_graphs(x, y)
+        except:
+            try:
+                # Convert data to list
+                feature_labels = df.columns.tolist()
+                feature_values = df.iloc[0].tolist()
+
+                # Create Tables
+                self.generate_tables(feature_labels, feature_values)
+            except:
+                return
 
     def upload_file(self):
         # Get File Path
@@ -94,15 +132,9 @@ class App(customtkinter.CTk):
             # Convert data to list
             x = measurement_df['COPx']
             y = measurement_df['COPy']
-            time = range(0, len(x))
 
             # Create Graphs
-            GraphGenerator.generate_scatter_plot(self.tabview_graph_frame_right_up, x, y, time,
-                                                 'COP Over Time Scatter Plot', 'COPx', 'COPy')
-            GraphGenerator.generate_line_plot(self.tabview_graph_frame_left_up, time, x, 'Mediolateral Line Plot',
-                                              'Time', 'COPx')
-            GraphGenerator.generate_line_plot(self.tabview_graph_frame_left_down, time, y, 'Anteroposterior Line Plot',
-                                              'Time', 'COPy')
+            self.generate_graphs(x, y)
 
         if feature_df is not None:
             # Convert data to list
@@ -110,8 +142,17 @@ class App(customtkinter.CTk):
             feature_values = feature_df.iloc[0].tolist()
 
             # Create Tables
-            GraphGenerator.generate_tables(self.tabview_scrollable_frame, feature_labels, feature_values)
+            self.generate_tables(feature_labels, feature_values)
 
+    def generate_graphs(self, x, y):
+        GraphGenerator.generate_poincare_plot(self.tabview_graph_frame_right_up, x, 'COPx Poincare Plot', 'RRn', 'RRn+1')
+        GraphGenerator.generate_poincare_plot(self.tabview_graph_frame_right_down, y, 'COPy Poincare Plot', 'RRn', 'RRn+1')
+        GraphGenerator.generate_line_plot(self.tabview_graph_frame_left_up, GraphGenerator.get_time_values(len(x)), x, 'Mediolateral Line Plot', 'Time (sec)','COPx')
+        GraphGenerator.generate_line_plot(self.tabview_graph_frame_left_down, GraphGenerator.get_time_values(len(y)), y, 'Anteroposterior Line Plot','Time (sec)', 'COPy')
+        GraphGenerator.generate_scatter_plot(self.tabview_graph_frame_down, x, y, 'COP Over Time Scatter Plot', 'COPx', 'COPy')
+
+    def generate_tables(self, feature_labels, feature_values):
+        GraphGenerator.generate_tables(self.tabview_scrollable_frame, feature_labels, feature_values)
 
 # Start the main loop
 if __name__ == "__main__":
